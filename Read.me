@@ -1,0 +1,78 @@
+Steps to Set Up Jenkins CI/CD with Terraform on AWS
+
+1. Prerequisites
+
+● AWS Account
+● EC2 instance for Jenkins
+● IAM role and user for Terraform with required permissions
+● S3 bucket and DynamoDB table for Terraform state management
+● Jenkins installed on the EC2 instance
+● Terraform installed on the Jenkins server
+
+### 2. Setup Jenkins on AWS EC2
+
+Launch an EC2 instance and install Jenkins: sudo apt update && sudo apt install -y openjdk-11-jdk
+wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+sudo apt update
+sudo apt install -y jenkins
+sudo systemctl start jenkins
+sudo systemctl enable jenkins
+
+Open port 8080 in AWS Security Group and get the admin password:
+ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+
+● Install necessary Jenkins plugins:
+○ Terraform
+○ AWS Credentials
+○ Git
+○ Pipeline
+
+3. Configure Terraform for AWS
+
+Install Terraform on Jenkins EC2: 
+wget https://releases.hashicorp.com/terraform/1.7.0/terraform_1.7.0_linux_amd64.zip
+unzip terraform_1.7.0_linux_amd64.zip
+sudo mv terraform /usr/local/bin/
+terraform -v
+
+● Create an IAM User in AWS with the following permissions:
+○ AmazonS3FullAccess (for Terraform state)
+○ AmazonDynamoDBFullAccess (for state locking)
+○ AdministratorAccess (for deploying resources)
+● Store AWS Credentials in Jenkins:
+○ Go to Jenkins > Manage Jenkins > Manage Credentials
+○ Add AWS Access Key and Secret Key
+
+4. Create Terraform Files
+
+● main.tf: Define AWS infrastructure (e.g., EC2, S3, RDS)
+● variables.tf: Store variable values
+● outputs.tf: Define output values
+● provider.tf: Configure AWS provider
+
+Initialize Terraform: 
+terraform init
+terraform validate
+
+5. Set Up Jenkins Pipeline for Terraform
+● Create a Jenkins Pipeline Job
+● Add the following Jenkinsfile in the repository:
+
+6. Run the CI/CD Pipeline
+● Go to Jenkins Dashboard → Select the Pipeline Job
+● Click on Build Now
+● Monitor logs for successful deployment
+
+7. Verify AWS Resources
+
+● Go to AWS Console
+● Check if EC2, S3, RDS, or other services were provisioned
+
+8. Destroy Infrastructure.
+If you want to delete the deployed infrastructure: 
+terraform destroy -auto-approve
+
+Conclusion
+This setup automates AWS infrastructure deployment using Jenkins and Terraform. 
+It ensures that infrastructure is provisioned and managed efficiently as part of a CI/CD pipeline.
